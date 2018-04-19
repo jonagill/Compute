@@ -1,0 +1,54 @@
+﻿#pragma kernel Generate
+
+#include "UnityCG.cginc"
+
+RWStructuredBuffer<float4> VertexBuffer;
+
+CBUFFER_START(Params)
+    float Extents;
+CBUFFER_END
+
+// int3 groupId : SV_GroupID
+// int3 threadId : SV_GroupThreadID
+
+[numthreads(1, 1, 1)]
+void Generate(uint3 id : SV_DispatchThreadID)
+{
+    //int idx1 = id * 3;
+    //int idx2 = id * 3 + 1;
+    //int idx3 = id * 3 + 2;
+
+    //float seed = floor(Time + id * 0.1) * 0.1;
+    //float3 v1 = RandomPoint(idx1 + seed);
+    //float3 v2 = RandomPoint(idx2 + seed);
+    //float3 v3 = RandomPoint(idx3 + seed);
+
+    //v2 = normalize(v1 + normalize(v2 - v1) * Extent);
+    //v3 = normalize(v1 + normalize(v3 - v1) * Extent);
+
+    //float l1 = snoise(v1 * NoiseFrequency + NoiseOffset).w;
+    //float l2 = snoise(v2 * NoiseFrequency + NoiseOffset).w;
+    //float l3 = snoise(v3 * NoiseFrequency + NoiseOffset).w;
+
+    //l1 = abs(l1 * l1 * l1);
+    //l2 = abs(l2 * l2 * l2);
+    //l3 = abs(l3 * l3 * l3);
+
+    //v1 *= 1 + l1 * NoiseAmplitude;
+    //v2 *= 1 + l2 * NoiseAmplitude;
+    //v3 *= 1 + l3 * NoiseAmplitude;
+
+    //float3 n = normalize(cross(v2 - v1, v3 - v2));
+
+    //PositionBuffer[idx1] = float4(v1, 0);
+    //PositionBuffer[idx2] = float4(v2, 0);
+    //PositionBuffer[idx3] = float4(v3, 0);
+
+    //NormalBuffer[idx1] = float4(n, 0);
+    //NormalBuffer[idx2] = float4(n, 0);
+    //NormalBuffer[idx3] = float4(n, 0);
+
+	VertexBuffer[0] = float4(1, 0, 0, 0);
+	VertexBuffer[1] = float4(0, 1, 0, 0);
+	VertexBuffer[2] = float4(0, 0, 0, 0);
+}
