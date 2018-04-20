@@ -21,6 +21,15 @@ public class CubeRenderer : MonoBehaviour
         cam = GetComponent<Camera>();
     }
 
+#if UNITY_EDITOR
+
+    private void OnApplicationQuit()
+    {
+        Destroy(this);
+    }
+
+#endif
+
     public void Initialize(ComputeShader compute, Material material)
     {
         if (this.compute == null)
@@ -48,8 +57,17 @@ public class CubeRenderer : MonoBehaviour
             EnsureBuffers();
 
             commandBuffer.Clear();
-            commandBuffer.DispatchCompute(compute, _generateKernelId, 1, 1, 1);
-            commandBuffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, 3);
+
+            if (CubeStandin.AllCubes.Count > 0)
+            {
+                commandBuffer.DispatchCompute(compute, _generateKernelId, 1, 1, 1);
+
+                foreach (var standin in CubeStandin.AllCubes)
+                {
+                    var matrix = standin.transform.localToWorldMatrix;
+                    commandBuffer.DrawProcedural(matrix, material, 0, MeshTopology.Triangles, 3);
+                }
+            }
         }
     }
 
