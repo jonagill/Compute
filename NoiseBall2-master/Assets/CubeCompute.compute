@@ -1,8 +1,9 @@
 ﻿#pragma kernel Generate
 
 #include "UnityCG.cginc"
+#include "ComputeShared.cginc"
 
-RWStructuredBuffer<float4> VertexBuffer;
+RWStructuredBuffer<ComputeVertex> VertexBuffer;
 
 CBUFFER_START(Params)
     float Extents;
@@ -48,7 +49,12 @@ void Generate(uint3 id : SV_DispatchThreadID)
     //NormalBuffer[idx2] = float4(n, 0);
     //NormalBuffer[idx3] = float4(n, 0);
 
-	VertexBuffer[0] = float4(1, 0, 0, 0);
-	VertexBuffer[1] = float4(0, 1, 0, 0);
-	VertexBuffer[2] = float4(0, 0, 0, 0);
+	VertexBuffer[0].position = float3(1, 0, 0);
+	VertexBuffer[0].normal = float3(0, 0, 1);
+
+	VertexBuffer[1].position = float3(0, 1, 0);
+	VertexBuffer[1].normal = float3(0, 0, 1);
+	
+	VertexBuffer[2].position = float3(0, 0, 0);
+	VertexBuffer[2].normal = float3(0, 0, 1);
 }

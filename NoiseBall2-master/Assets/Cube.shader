@@ -3,8 +3,8 @@
     Properties
     {
         _Color("Color", Color) = (1, 1, 1, 1)
-        // _Smoothness("Smoothness", Range(0, 1)) = 0
-        // _Metallic("Metallic", Range(0, 1)) = 0
+         _Smoothness("Smoothness", Range(0, 1)) = 0
+         _Metallic("Metallic", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -14,25 +14,21 @@
 
         CGPROGRAM
 
-        #pragma surface surf Lambert vertex:vert noshadow nolightmap
-        // #pragma instancing_options procedural:setup
+		#include "ComputeShared.cginc"
+
+        #pragma surface surf Standard vertex:vert
         #pragma target 3.5
 
-        #if SHADER_TARGET >= 35 && (defined(SHADER_API_D3D11) || defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_PSSL) || defined(SHADER_API_SWITCH) || defined(SHADER_API_VULKAN) || (defined(SHADER_API_METAL) && defined(UNITY_COMPILER_HLSLCC)))
-            #define SUPPORT_STRUCTUREDBUFFER
-        #endif
-
-        #if defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) && defined(SUPPORT_STRUCTUREDBUFFER)
-            #define ENABLE_INSTANCING
-        #endif
+		#if SHADER_TARGET >= 35 && (defined(SHADER_API_D3D11) || defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_PSSL) || defined(SHADER_API_SWITCH) || defined(SHADER_API_VULKAN) || (defined(SHADER_API_METAL) && defined(UNITY_COMPILER_HLSLCC)))
+			#define SUPPORT_STRUCTUREDBUFFER
+		#endif
 
         struct appdata
         {
             float4 vertex : POSITION;
             float3 normal : NORMAL;
-            // float4 tangent : TANGENT;
+			float4 tangent : TANGENT;
             uint vid : SV_VertexID;
-            // UNITY_VERTEX_INPUT_INSTANCE_ID
         };
 
         struct Input
@@ -41,42 +37,28 @@
         };
 
         half4 _Color;
-        
-		// half _Smoothness;
-        // half _Metallic;
+		half _Smoothness;
+        half _Metallic;
 
-        //float4x4 _LocalToWorld;
-        //float4x4 _WorldToLocal;
-
-        #if defined(ENABLE_INSTANCING)
-
-        StructuredBuffer<float4> VertexBuffer;
-
-        #endif
+#if defined(SUPPORT_STRUCTUREDBUFFER)
+        StructuredBuffer<ComputeVertex> VertexBuffer;
+#endif
 
         void vert(inout appdata v)
         {
-            #if defined(ENABLE_INSTANCING)
-
-			// Use this ID instead of we are instancing multiple instances of the same geo
-            // uint id = unity_InstanceID * 3 + v.vid;
-            v.vertex.xyz = VertexBuffer[v.vid].xyz;
-
-            #endif
+#if defined(SUPPORT_STRUCTUREDBUFFER)
+			ComputeVertex vertex = VertexBuffer[v.vid];
+			v.vertex.xyz = vertex.position;
+			v.normal.xyz = vertex.normal;
+#endif
         }
 
-        //void setup()
-        //{
-        //    unity_ObjectToWorld = _LocalToWorld;
-        //    unity_WorldToObject = _WorldToLocal;
-        //}
-
-        void surf(Input IN, inout SurfaceOutput o)
+        void surf(Input IN, inout SurfaceOutputStandard o)
         {
-            o.Albedo = _Color.rgb;
-            // o.Metallic = _Metallic;
-            // o.Smoothness = _Smoothness;
-            // o.Normal = float3(0, 0, IN.vface < 0 ? -1 : 1);
+			o.Albedo = _Color.rgb;
+			o.Metallic = _Metallic;
+			o.Smoothness = _Smoothness;
+            o.Normal = float3(0, 0, IN.vface < 0 ? -1 : 1);
         }
 
         ENDCG

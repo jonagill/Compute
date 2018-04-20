@@ -5,6 +5,24 @@ using UnityEngine.Rendering;
 
 public class CubeRenderer : MonoBehaviour
 {
+    private struct ComputeVertex
+    {
+        public Vector3 position;
+        public Vector3 normal;
+
+        public static int Size
+        {
+            get
+            {
+                return
+                    // position
+                    (sizeof(float) * 3) +
+                    // normal
+                    (sizeof(float) * 3);
+            }
+        }
+    }
+
     private ComputeShader compute;
     private Material material;
 
@@ -86,7 +104,7 @@ public class CubeRenderer : MonoBehaviour
         {
             ReleaseBuffers();
 
-            vertexBuffer = new ComputeBuffer(3, sizeof(float) * 4);
+            vertexBuffer = new ComputeBuffer(3, ComputeVertex.Size);
 
             compute.SetBuffer(_generateKernelId, _vertexBufferId, vertexBuffer);
             material.SetBuffer(_vertexBufferId, vertexBuffer);
