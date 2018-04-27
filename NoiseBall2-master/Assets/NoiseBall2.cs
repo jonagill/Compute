@@ -125,17 +125,17 @@ public class NoiseBall2 : MonoBehaviour
         }
 #endif
 
-        var kernel = _compute.FindKernel("Update");
-        _commandBuffer.DispatchCompute(_compute, kernel, ThreadGroupCount, 1, 1);
-        _commandBuffer.DrawMeshInstancedIndirect(
-            _mesh, 
-            0, 
-            _material,
-            0,
-            // new Bounds(transform.position, transform.lossyScale * 5),
-            _drawArgsBuffer, 
-            0, 
-            _props);
+        //var kernel = _compute.FindKernel("Update");
+        //_commandBuffer.DispatchCompute(_compute, kernel, ThreadGroupCount, 1, 1);
+        //_commandBuffer.DrawMeshInstancedIndirect(
+        //    _mesh, 
+        //    0,
+        //    _material,
+        //    0,
+        //    // new Bounds(transform.position, transform.lossyScale * 5),
+        //    _drawArgsBuffer, 
+        //    0, 
+        //    _props);
     }
 
     void OnDestroy()
@@ -177,7 +177,7 @@ public class NoiseBall2 : MonoBehaviour
         _compute.SetBuffer(kernel, "PositionBuffer", _positionBuffer);
         _compute.SetBuffer(kernel, "NormalBuffer", _normalBuffer);
 
-        // _compute.Dispatch(kernel, ThreadGroupCount, 1, 1);
+        _compute.Dispatch(kernel, ThreadGroupCount, 1, 1);
 
         // Draw the mesh with instancing.
         _material.SetMatrix("_LocalToWorld", transform.localToWorldMatrix);
@@ -188,6 +188,12 @@ public class NoiseBall2 : MonoBehaviour
 
         // Move the noise field.
         _noiseOffset += _noiseMotion * Time.deltaTime;
+
+        Graphics.DrawMeshInstancedIndirect(
+            _mesh, 0, _material,
+            new Bounds(transform.position, transform.lossyScale * 5),
+            _drawArgsBuffer, 0, _props
+        );
     }
 
     #endregion
