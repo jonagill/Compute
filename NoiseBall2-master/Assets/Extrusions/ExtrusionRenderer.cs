@@ -4,32 +4,36 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class ExtrusionRenderer : MonoBehaviour {
-
-    public static readonly List<ExtrusionVisibility> AllExtrusions = new List<ExtrusionVisibility>();
-
+public class ExtrusionRenderer : MonoBehaviour
+{
     private readonly List<SubExtrusion> subExtrusionsToRender = new List<SubExtrusion>();
 
-    public Mesh cubeMesh;
-    public Material material;
+    private new Camera camera;
 
-	void Update ()
+    private void Awake()
+    {
+        camera = GetComponent<Camera>();
+    }
+
+    void Update ()
     {
         RenderExtrusions();
 	}
 
     private void RenderExtrusions()
     {
-        CollectSubextrusionsToRender();
+        var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(camera);
+        CollectSubextrusionsToRender(frustumPlanes);
         RenderSubextrusions();
     }
 
-    private void CollectSubextrusionsToRender()
+    private void CollectSubextrusionsToRender(Plane[] frustumPlanes)
     {
         subExtrusionsToRender.Clear();
-        foreach (var extrusion in AllExtrusions)
+        foreach (var extrusion in ExtrusionManager.AllExtrusions)
         {
-            if (extrusion.IsVisible)
+            // Only render any subextrusions if this extrusion is a) globally visible and b) visible to this particular camera
+            if (extrusion.IsVisible && GeometryUtility.TestPlanesAABB(frustumPlanes, extrusion.WorldBounds))
             {
                 subExtrusionsToRender.AddRange(extrusion.SubExtrusions);
             }
@@ -38,9 +42,9 @@ public class ExtrusionRenderer : MonoBehaviour {
 
     private void RenderSubextrusions()
     {
-        // TODO(jonagill): Special case ignored extrusions somehow?
+        // TODO(jonagill): Special case ignored and highlighted extrusions somehow?
         var matrices = subExtrusionsToRender.Select(s => s.transform.localToWorldMatrix).ToArray();
-        Graphics.DrawMeshInstanced(cubeMesh, 0, material, matrices, matrices.Length, null, ShadowCastingMode.On, true, gameObject.layer, null);
+        Graphics.DrawMeshInstanced(ExtrusionManager.Instance.cubeMesh, 0, ExtrusionManager.Instance.renderMaterial, matrices, matrices.Length, null, ShadowCastingMode.On, true, gameObject.layer, null);
     }
 
 }
